@@ -71,25 +71,8 @@ export default function Meetings() {
     }
   });
 
-  const summarizeMeeting = useMutation({
-    mutationFn: async (id: number) => {
-      const res = await apiRequest("POST", `/api/meetings/${id}/summarize`, {});
-      return res.json();
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/meetings"] });
-      toast({
-        title: "Meeting summarized",
-        description: "AI has generated a summary of the meeting notes"
-      });
-    },
-    onError: (error: Error) => {
-      toast({
-        title: "Failed to summarize meeting",
-        description: error.message,
-        variant: "destructive"
-      });
-    }
+  const handleSubmit = form.handleSubmit((data) => {
+    createMeeting.mutate(data);
   });
 
   return (
@@ -112,7 +95,7 @@ export default function Meetings() {
               <DialogTitle>Record New Meeting</DialogTitle>
             </DialogHeader>
             <Form {...form}>
-              <form onSubmit={form.handleSubmit((data) => createMeeting.mutate(data))} className="space-y-4">
+              <form onSubmit={handleSubmit} className="space-y-4">
                 <FormField
                   control={form.control}
                   name="title"
@@ -140,7 +123,7 @@ export default function Meetings() {
                   )}
                 />
                 <Button type="submit" disabled={createMeeting.isPending}>
-                  Save Meeting
+                  {createMeeting.isPending ? "Saving..." : "Save Meeting"}
                 </Button>
               </form>
             </Form>
