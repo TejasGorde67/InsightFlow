@@ -3,8 +3,11 @@ import OpenAI from "openai";
 // the newest OpenAI model is "gpt-4o" which was released May 13, 2024. do not change this unless explicitly requested by the user
 const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
 
-export async function generateWeeklyReport(tasks: any[], meetings: any[]): Promise<string> {
-  const prompt = `Generate a detailed weekly project report based on the following data:
+async function generateWeeklyReport(tasks: any[], meetings: any[]): Promise<string> {
+  try {
+    const response = await openai.chat.completions.create({
+      model: "gpt-4o",
+      messages: [{ role: "user", content: `Generate a detailed weekly project report based on the following data:
 Tasks: ${JSON.stringify(tasks)}
 Meetings: ${JSON.stringify(meetings)}
 
@@ -22,19 +25,22 @@ Respond with JSON in this format:
   "challenges": string[],
   "priorities": string[],
   "meetingHighlights": string[]
-}`;
+}` }],
+      response_format: { type: "json_object" }
+    });
 
-  const response = await openai.chat.completions.create({
-    model: "gpt-4o",
-    messages: [{ role: "user", content: prompt }],
-    response_format: { type: "json_object" }
-  });
-
-  return response.choices[0].message.content;
+    return response.choices[0].message.content || '{"error": "No content generated"}';
+  } catch (error) {
+    console.error('OpenAI API Error:', error);
+    throw new Error(`Failed to generate report: ${error.message}`);
+  }
 }
 
-export async function summarizeMeetingNotes(notes: string): Promise<string> {
-  const prompt = `Please summarize the following meeting notes concisely, highlighting key decisions and action items:
+async function summarizeMeetingNotes(notes: string): Promise<string> {
+  try {
+    const response = await openai.chat.completions.create({
+      model: "gpt-4o",
+      messages: [{ role: "user", content: `Please summarize the following meeting notes concisely, highlighting key decisions and action items:
 
 ${notes}
 
@@ -43,13 +49,15 @@ Respond with JSON in this format:
   "summary": string,
   "decisions": string[],
   "actionItems": string[]
-}`;
+}` }],
+      response_format: { type: "json_object" }
+    });
 
-  const response = await openai.chat.completions.create({
-    model: "gpt-4o",
-    messages: [{ role: "user", content: prompt }],
-    response_format: { type: "json_object" }
-  });
-
-  return response.choices[0].message.content;
+    return response.choices[0].message.content || '{"error": "No content generated"}';
+  } catch (error) {
+    console.error('OpenAI API Error:', error);
+    throw new Error(`Failed to summarize notes: ${error.message}`);
+  }
 }
+
+export { generateWeeklyReport, summarizeMeetingNotes };

@@ -40,7 +40,7 @@ export default function Meetings() {
     defaultValues: {
       title: "",
       notes: "",
-      date: new Date().toISOString()
+      date: new Date()
     }
   });
 
@@ -115,7 +115,7 @@ export default function Meetings() {
                     <FormItem>
                       <FormLabel>Notes</FormLabel>
                       <FormControl>
-                        <Textarea {...field} className="min-h-[100px]" />
+                        <Textarea {...field} value={field.value || ''} className="min-h-[100px]" />
                       </FormControl>
                       <FormMessage />
                     </FormItem>

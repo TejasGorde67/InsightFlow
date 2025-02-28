@@ -117,7 +117,7 @@ export default function Tasks() {
                     <FormItem>
                       <FormLabel>Description</FormLabel>
                       <FormControl>
-                        <Input {...field} />
+                        <Input {...field} value={field.value || ''} />
                       </FormControl>
                       <FormMessage />
                     </FormItem>

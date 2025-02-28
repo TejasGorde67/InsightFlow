@@ -54,7 +54,12 @@ export class MemStorage implements IStorage {
 
   async createProject(project: InsertProject): Promise<Project> {
     const id = this.currentIds.projects++;
-    const newProject = { ...project, id };
+    const newProject = {
+      id,
+      name: project.name,
+      description: project.description || null,
+      status: project.status || "active"
+    };
     this.projects.set(id, newProject);
     return newProject;
   }
@@ -79,7 +84,14 @@ export class MemStorage implements IStorage {
 
   async createTask(task: InsertTask): Promise<Task> {
     const id = this.currentIds.tasks++;
-    const newTask = { ...task, id };
+    const newTask = {
+      id,
+      title: task.title,
+      description: task.description || null,
+      status: task.status || "pending",
+      projectId: task.projectId || null,
+      dueDate: task.dueDate || null
+    };
     this.tasks.set(id, newTask);
     return newTask;
   }
@@ -108,7 +120,14 @@ export class MemStorage implements IStorage {
 
   async createMeeting(meeting: InsertMeeting): Promise<Meeting> {
     const id = this.currentIds.meetings++;
-    const newMeeting = { ...meeting, id, summary: null };
+    const newMeeting = {
+      id,
+      title: meeting.title,
+      date: meeting.date,
+      notes: meeting.notes || null,
+      summary: null,
+      projectId: meeting.projectId || null
+    };
     this.meetings.set(id, newMeeting);
     return newMeeting;
   }
@@ -129,7 +148,13 @@ export class MemStorage implements IStorage {
 
   async createReport(report: InsertReport): Promise<Report> {
     const id = this.currentIds.reports++;
-    const newReport = { ...report, id };
+    const newReport = {
+      id,
+      type: report.type,
+      content: report.content,
+      projectId: report.projectId || null,
+      generatedAt: report.generatedAt
+    };
     this.reports.set(id, newReport);
     return newReport;
   }
