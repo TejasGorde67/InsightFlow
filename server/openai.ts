@@ -31,8 +31,11 @@ Respond with JSON in this format:
 
     return response.choices[0].message.content || '{"error": "No content generated"}';
   } catch (error) {
-    console.error('OpenAI API Error:', error);
-    throw new Error(`Failed to generate report: ${error.message}`);
+    if (error instanceof Error) {
+      console.error('OpenAI API Error:', error);
+      throw new Error(`Failed to generate report: ${error.message}`);
+    }
+    throw new Error('Failed to generate report: Unknown error');
   }
 }
 
@@ -55,8 +58,11 @@ Respond with JSON in this format:
 
     return response.choices[0].message.content || '{"error": "No content generated"}';
   } catch (error) {
-    console.error('OpenAI API Error:', error);
-    throw new Error(`Failed to summarize notes: ${error.message}`);
+    if (error instanceof Error) {
+      console.error('OpenAI API Error:', error);
+      throw new Error(`Failed to summarize notes: ${error.message}`);
+    }
+    throw new Error('Failed to summarize notes: Unknown error');
   }
 }
 

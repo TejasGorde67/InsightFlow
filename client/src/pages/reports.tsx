@@ -25,6 +25,13 @@ export default function Reports() {
         title: "Report generated",
         description: "AI has generated a new weekly report"
       });
+    },
+    onError: (error: Error) => {
+      toast({
+        title: "Failed to generate report",
+        description: error.message,
+        variant: "destructive"
+      });
     }
   });
 

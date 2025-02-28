@@ -71,6 +71,13 @@ export default function Meetings() {
         title: "Meeting summarized",
         description: "AI has generated a summary of the meeting notes"
       });
+    },
+    onError: (error: Error) => {
+      toast({
+        title: "Failed to summarize meeting",
+        description: error.message,
+        variant: "destructive"
+      });
     }
   });
 

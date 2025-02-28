@@ -63,13 +63,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   app.post("/api/meetings/:id/summarize", async (req, res) => {
-    const meeting = await storage.getMeeting(Number(req.params.id));
-    if (!meeting) {
-      return res.status(404).json({ error: "Meeting not found" });
+    try {
+      const meeting = await storage.getMeeting(Number(req.params.id));
+      if (!meeting) {
+        return res.status(404).json({ error: "Meeting not found" });
+      }
+      const summary = await summarizeMeetingNotes(meeting.notes || "");
+      const updated = await storage.updateMeeting(meeting.id, { summary });
+      res.json(updated);
+    } catch (error) {
+      const message = error instanceof Error ? error.message : "Failed to summarize meeting";
+      res.status(500).json({ error: message });
     }
-    const summary = await summarizeMeetingNotes(meeting.notes || "");
-    const updated = await storage.updateMeeting(meeting.id, { summary });
-    res.json(updated);
   });
 
   // Reports
@@ -80,21 +85,26 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   app.post("/api/reports/generate", async (req, res) => {
-    const { projectId } = req.body;
-    const [tasks, meetings] = await Promise.all([
-      storage.getTasks(projectId),
-      storage.getMeetings(projectId)
-    ]);
-    
-    const content = await generateWeeklyReport(tasks, meetings);
-    const report = await storage.createReport({
-      projectId,
-      content,
-      generatedAt: new Date(),
-      type: "weekly"
-    });
-    
-    res.json(report);
+    try {
+      const { projectId } = req.body;
+      const [tasks, meetings] = await Promise.all([
+        storage.getTasks(projectId),
+        storage.getMeetings(projectId)
+      ]);
+
+      const content = await generateWeeklyReport(tasks, meetings);
+      const report = await storage.createReport({
+        projectId,
+        content,
+        generatedAt: new Date(),
+        type: "weekly"
+      });
+
+      res.json(report);
+    } catch (error) {
+      const message = error instanceof Error ? error.message : "Failed to generate report";
+      res.status(500).json({ error: message });
+    }
   });
 
   const httpServer = createServer(app);
