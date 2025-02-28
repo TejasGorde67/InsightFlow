@@ -38,7 +38,11 @@ export const reports = pgTable("reports", {
 // Insert schemas
 export const insertProjectSchema = createInsertSchema(projects).omit({ id: true });
 export const insertTaskSchema = createInsertSchema(tasks).omit({ id: true });
-export const insertMeetingSchema = createInsertSchema(meetings).omit({ id: true, summary: true });
+export const insertMeetingSchema = createInsertSchema(meetings)
+  .omit({ id: true, summary: true })
+  .extend({
+    date: z.string().transform((str) => new Date(str))
+  });
 export const insertReportSchema = createInsertSchema(reports).omit({ id: true });
 
 // Types

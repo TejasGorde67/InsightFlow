@@ -48,7 +48,10 @@ export default function Meetings() {
     mutationFn: async (data: InsertMeeting) => {
       try {
         console.log('Submitting meeting data:', data);
-        const res = await apiRequest("POST", "/api/meetings", data);
+        const res = await apiRequest("POST", "/api/meetings", {
+          ...data,
+          date: new Date(data.date).toISOString()
+        });
         const result = await res.json();
         console.log('Server response:', result);
         return result;
@@ -134,11 +137,16 @@ export default function Meetings() {
                 <FormField
                   control={form.control}
                   name="date"
-                  render={({ field }) => (
+                  render={({ field: { onChange, value, ...field } }) => (
                     <FormItem>
                       <FormLabel>Date</FormLabel>
                       <FormControl>
-                        <Input type="date" {...field} />
+                        <Input 
+                          type="date" 
+                          onChange={onChange}
+                          value={typeof value === 'string' ? value.split('T')[0] : value}
+                          {...field}
+                        />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
