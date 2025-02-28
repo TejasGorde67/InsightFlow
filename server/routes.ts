@@ -54,12 +54,19 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   app.post("/api/meetings", async (req, res) => {
-    const parsed = insertMeetingSchema.safeParse(req.body);
-    if (!parsed.success) {
-      return res.status(400).json({ error: "Invalid meeting data" });
+    try {
+      const parsed = insertMeetingSchema.safeParse(req.body);
+      if (!parsed.success) {
+        console.error('Meeting validation error:', parsed.error);
+        return res.status(400).json({ error: "Invalid meeting data" });
+      }
+      const meeting = await storage.createMeeting(parsed.data);
+      res.json(meeting);
+    } catch (error) {
+      console.error('Error creating meeting:', error);
+      const message = error instanceof Error ? error.message : "Failed to create meeting";
+      res.status(500).json({ error: message });
     }
-    const meeting = await storage.createMeeting(parsed.data);
-    res.json(meeting);
   });
 
   app.post("/api/meetings/:id/summarize", async (req, res) => {

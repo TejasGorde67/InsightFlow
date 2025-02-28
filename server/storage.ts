@@ -119,17 +119,22 @@ export class MemStorage implements IStorage {
   }
 
   async createMeeting(meeting: InsertMeeting): Promise<Meeting> {
-    const id = this.currentIds.meetings++;
-    const newMeeting = {
-      id,
-      title: meeting.title,
-      date: meeting.date,
-      notes: meeting.notes || null,
-      summary: null,
-      projectId: meeting.projectId || null
-    };
-    this.meetings.set(id, newMeeting);
-    return newMeeting;
+    try {
+      const id = this.currentIds.meetings++;
+      const newMeeting = {
+        id,
+        title: meeting.title,
+        date: new Date(meeting.date),
+        notes: meeting.notes || null,
+        summary: null,
+        projectId: meeting.projectId || null
+      };
+      this.meetings.set(id, newMeeting);
+      return newMeeting;
+    } catch (error) {
+      console.error('Error in createMeeting:', error);
+      throw new Error('Failed to create meeting');
+    }
   }
 
   async updateMeeting(id: number, meeting: Partial<Meeting>): Promise<Meeting> {
