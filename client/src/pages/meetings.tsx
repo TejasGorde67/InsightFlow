@@ -2,7 +2,7 @@ import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Plus, FileText } from "lucide-react";
+import { Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -40,18 +40,22 @@ export default function Meetings() {
     defaultValues: {
       title: "",
       notes: "",
-      date: new Date().toISOString()
+      date: new Date().toISOString().split('T')[0]
     }
   });
 
   const createMeeting = useMutation({
     mutationFn: async (data: InsertMeeting) => {
-      const formattedData = {
-        ...data,
-        date: new Date(data.date).toISOString()
-      };
-      const res = await apiRequest("POST", "/api/meetings", formattedData);
-      return res.json();
+      try {
+        console.log('Submitting meeting data:', data);
+        const res = await apiRequest("POST", "/api/meetings", data);
+        const result = await res.json();
+        console.log('Server response:', result);
+        return result;
+      } catch (error) {
+        console.error('Error creating meeting:', error);
+        throw error;
+      }
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/meetings"] });
@@ -63,6 +67,7 @@ export default function Meetings() {
       });
     },
     onError: (error: Error) => {
+      console.error('Mutation error:', error);
       toast({
         title: "Failed to create meeting",
         description: error.message,
@@ -71,9 +76,13 @@ export default function Meetings() {
     }
   });
 
-  const handleSubmit = form.handleSubmit((data) => {
-    createMeeting.mutate(data);
-  });
+  const onSubmit = async (data: InsertMeeting) => {
+    try {
+      await createMeeting.mutateAsync(data);
+    } catch (error) {
+      console.error('Form submission error:', error);
+    }
+  };
 
   return (
     <div className="p-8 space-y-8">
@@ -95,7 +104,7 @@ export default function Meetings() {
               <DialogTitle>Record New Meeting</DialogTitle>
             </DialogHeader>
             <Form {...form}>
-              <form onSubmit={handleSubmit} className="space-y-4">
+              <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
                 <FormField
                   control={form.control}
                   name="title"
@@ -122,6 +131,19 @@ export default function Meetings() {
                     </FormItem>
                   )}
                 />
+                <FormField
+                  control={form.control}
+                  name="date"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Date</FormLabel>
+                      <FormControl>
+                        <Input type="date" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
                 <Button type="submit" disabled={createMeeting.isPending}>
                   {createMeeting.isPending ? "Saving..." : "Save Meeting"}
                 </Button>
@@ -137,30 +159,15 @@ export default function Meetings() {
             key={meeting.id}
             className="p-4 rounded-lg border bg-card text-card-foreground"
           >
-            <div className="flex justify-between items-start">
-              <div className="space-y-2">
-                <h3 className="font-semibold">{meeting.title}</h3>
-                <div className="text-sm text-muted-foreground space-y-1">
-                  <p className="font-medium">Notes:</p>
-                  <p className="whitespace-pre-wrap">{meeting.notes}</p>
-                  {meeting.summary && (
-                    <>
-                      <p className="font-medium mt-4">AI Summary:</p>
-                      <p className="whitespace-pre-wrap">{meeting.summary}</p>
-                    </>
-                  )}
-                </div>
-              </div>
-              {!meeting.summary && (
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => summarizeMeeting.mutate(meeting.id)}
-                  disabled={summarizeMeeting.isPending}
-                >
-                  <FileText className="mr-2 h-4 w-4" />
-                  Summarize
-                </Button>
+            <div className="space-y-2">
+              <h3 className="font-semibold">{meeting.title}</h3>
+              <p className="text-sm text-muted-foreground">
+                {new Date(meeting.date).toLocaleDateString()}
+              </p>
+              {meeting.notes && (
+                <p className="text-sm text-muted-foreground whitespace-pre-wrap">
+                  {meeting.notes}
+                </p>
               )}
             </div>
           </div>
