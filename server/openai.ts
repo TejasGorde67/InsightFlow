@@ -33,6 +33,9 @@ Respond with JSON in this format:
   } catch (error) {
     if (error instanceof Error) {
       console.error('OpenAI API Error:', error);
+      if ((error as any).status === 429) {
+        throw new Error('AI service is currently unavailable due to rate limiting. Please try again later.');
+      }
       throw new Error(`Failed to generate report: ${error.message}`);
     }
     throw new Error('Failed to generate report: Unknown error');
@@ -60,6 +63,9 @@ Respond with JSON in this format:
   } catch (error) {
     if (error instanceof Error) {
       console.error('OpenAI API Error:', error);
+      if ((error as any).status === 429) {
+        throw new Error('AI service is currently unavailable due to rate limiting. Please try again later.');
+      }
       throw new Error(`Failed to summarize notes: ${error.message}`);
     }
     throw new Error('Failed to summarize notes: Unknown error');

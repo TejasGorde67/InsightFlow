@@ -27,9 +27,13 @@ export default function Reports() {
       });
     },
     onError: (error: Error) => {
+      let description = error.message;
+      if (description.includes('rate limiting')) {
+        description = "The AI service is currently unavailable due to high demand. Please try again later.";
+      }
       toast({
         title: "Failed to generate report",
-        description: error.message,
+        description,
         variant: "destructive"
       });
     }
@@ -45,7 +49,7 @@ export default function Reports() {
 
         <Button onClick={() => generateReport.mutate()} disabled={generateReport.isPending}>
           <FileText className="mr-2 h-4 w-4" />
-          Generate Report
+          {generateReport.isPending ? "Generating..." : "Generate Report"}
         </Button>
       </div>
 
