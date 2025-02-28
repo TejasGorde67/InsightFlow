@@ -40,13 +40,17 @@ export default function Meetings() {
     defaultValues: {
       title: "",
       notes: "",
-      date: new Date()
+      date: new Date().toISOString()
     }
   });
 
   const createMeeting = useMutation({
     mutationFn: async (data: InsertMeeting) => {
-      const res = await apiRequest("POST", "/api/meetings", data);
+      const formattedData = {
+        ...data,
+        date: new Date(data.date).toISOString()
+      };
+      const res = await apiRequest("POST", "/api/meetings", formattedData);
       return res.json();
     },
     onSuccess: () => {
@@ -56,6 +60,13 @@ export default function Meetings() {
       toast({
         title: "Meeting created",
         description: "New meeting has been recorded successfully"
+      });
+    },
+    onError: (error: Error) => {
+      toast({
+        title: "Failed to create meeting",
+        description: error.message,
+        variant: "destructive"
       });
     }
   });
