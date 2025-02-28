@@ -5,8 +5,11 @@ import {
   CheckSquare,
   FileText,
   Users,
-  Settings
+  Moon,
+  Sun,
 } from "lucide-react";
+import { useTheme } from "@/hooks/use-theme";
+import { Button } from "@/components/ui/button";
 
 const navigation = [
   { name: "Dashboard", href: "/", icon: LayoutDashboard },
@@ -17,6 +20,7 @@ const navigation = [
 
 export function Sidebar() {
   const [location] = useLocation();
+  const { theme, setTheme } = useTheme();
 
   return (
     <div className="flex flex-col h-full bg-sidebar border-r border-sidebar-border">
@@ -43,6 +47,19 @@ export function Sidebar() {
           );
         })}
       </nav>
+      <div className="p-4">
+        <Button
+          variant="outline"
+          size="icon"
+          onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
+        >
+          {theme === "dark" ? (
+            <Sun className="h-5 w-5" />
+          ) : (
+            <Moon className="h-5 w-5" />
+          )}
+        </Button>
+      </div>
     </div>
   );
 }
